@@ -1,0 +1,137 @@
+import { Head, Link } from '@inertiajs/react';
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+
+export default function Index({ auth, documents, archiveBox }) {
+    const getDocumentIcon = (category) => {
+        const icons = {
+            'invoice': '📄',
+            'contract': '📋',
+            'report': '📊',
+            'letter': '✉️',
+            'receipt': '🧾',
+            'form': '📝',
+            'manual': '📚',
+            'certificate': '🏆',
+            'default': '📄'
+        };
+        return icons[category.toLowerCase()] || icons.default;
+    };
+
+    return (
+        <AuthenticatedLayout
+            user={auth.user}
+            header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">Documents</h2>}
+        >
+            <Head title="Documents" />
+
+            <div className="py-12">
+                <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
+                    <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                        <div className="p-6 text-gray-900">
+                            {/* Header with Add Document button and Box info */}
+                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                                <div>
+                                    <h3 className="text-lg font-semibold text-gray-900">
+                                        {archiveBox ? `Documents in ${archiveBox.name}` : 'All Documents'}
+                                    </h3>
+                                    {archiveBox && (
+                                        <p className="text-sm text-gray-600 mt-1">
+                                            {archiveBox.document_type} • {archiveBox.status}
+                                        </p>
+                                    )}
+                                </div>
+                                <div className="flex gap-2">
+                                    <Link
+                                        href={route('documents.create', { archive_box_id: archiveBox?.id })}
+                                        className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded transition"
+                                    >
+                                        Add Document
+                                    </Link>
+                                    <Link
+                                        href={route('documents.archive-with-location', { archive_box_id: archiveBox?.id })}
+                                        className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition"
+                                    >
+                                        Archive with Location
+                                    </Link>
+                                </div>
+                            </div>
+
+                            {/* Documents Grid */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                                {documents.map((document) => (
+                                    <div key={document.id} className="bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                                        {/* Document Icon */}
+                                        <div className="p-4 border-b border-gray-100">
+                                            <div className="flex items-center justify-center h-16">
+                                                <span className="text-4xl">
+                                                    {getDocumentIcon(document.category)}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        
+                                        {/* Document Info */}
+                                        <div className="p-4">
+                                            <h3 className="text-lg font-semibold text-gray-900 mb-2">{document.name}</h3>
+                                            <p className="text-sm text-gray-600 mb-2">{document.category}</p>
+                                            <p className="text-sm text-gray-500 mb-4">{document.year}</p>
+                                            
+                                            {/* Action Buttons */}
+                                            <div className="flex gap-2">
+                                                <Link
+                                                    href={route('documents.show', document.id)}
+                                                    className="flex-1 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium py-2 px-3 rounded text-center transition"
+                                                >
+                                                    View
+                                                </Link>
+                                                <Link
+                                                    href={route('documents.edit', document.id)}
+                                                    className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white text-sm font-medium py-2 px-3 rounded text-center transition"
+                                                >
+                                                    Edit
+                                                </Link>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* Empty State */}
+                            {documents.length === 0 && (
+                                <div className="text-center py-12">
+                                    <span className="text-6xl mb-4 block">📄</span>
+                                    <h3 className="mt-2 text-sm font-medium text-gray-900">No documents</h3>
+                                    <p className="mt-1 text-sm text-gray-500">
+                                        {archiveBox 
+                                            ? `Get started by adding documents to ${archiveBox.name}.`
+                                            : 'Get started by creating a new document.'
+                                        }
+                                    </p>
+                                    <div className="mt-6">
+                                        <Link
+                                            href={route('documents.create', { archive_box_id: archiveBox?.id })}
+                                            className="bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded"
+                                        >
+                                            Add Document
+                                        </Link>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Back to Archive Boxes */}
+                            {archiveBox && (
+                                <div className="mt-8 pt-6 border-t border-gray-200">
+                                    <Link
+                                        href={route('archive-boxes.show', archiveBox.id)}
+                                        className="text-blue-600 hover:text-blue-800 font-medium"
+                                    >
+                                        ← Back to Archive Box
+                                    </Link>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </AuthenticatedLayout>
+    );
+} 
