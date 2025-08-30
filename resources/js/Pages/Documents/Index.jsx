@@ -73,7 +73,34 @@ export default function Index({ auth, documents, archiveBox }) {
                                         <div className="p-4">
                                             <h3 className="text-lg font-semibold text-gray-900 mb-2">{document.name}</h3>
                                             <p className="text-sm text-gray-600 mb-2">{document.category}</p>
-                                            <p className="text-sm text-gray-500 mb-4">{document.year}</p>
+                                            <p className="text-sm text-gray-500 mb-3">{document.year}</p>
+                                            
+                                            {/* File Status */}
+                                            <div className="mb-4">
+                                                {document.file_path ? (
+                                                    <div className="flex items-center justify-between p-2 bg-green-50 rounded-md border border-green-200">
+                                                        <div className="flex items-center">
+                                                            <svg className="h-4 w-4 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                                            </svg>
+                                                            <span className="text-xs text-green-700 font-medium">File attached</span>
+                                                        </div>
+                                                        <Link
+                                                            href={route('documents.download', document.id)}
+                                                            className="text-green-600 hover:text-green-800 text-xs font-medium"
+                                                        >
+                                                            Download
+                                                        </Link>
+                                                    </div>
+                                                ) : (
+                                                    <div className="flex items-center p-2 bg-gray-50 rounded-md border border-gray-200">
+                                                        <svg className="h-4 w-4 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                                        </svg>
+                                                        <span className="text-xs text-gray-500">No file uploaded</span>
+                                                    </div>
+                                                )}
+                                            </div>
                                             
                                             {/* Action Buttons */}
                                             <div className="flex gap-2">

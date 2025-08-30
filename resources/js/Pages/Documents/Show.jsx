@@ -83,6 +83,55 @@ export default function Show({ auth, document }) {
                                             </div>
                                         </div>
                                     </div>
+
+                                    {/* File Information */}
+                                    <div className="bg-white rounded-lg p-6 mt-6 border border-gray-200">
+                                        <h3 className="text-lg font-semibold text-gray-900 mb-4">File Information</h3>
+                                        
+                                        {document.file_path ? (
+                                            <div className="space-y-4">
+                                                <div className="flex items-center p-3 bg-green-50 rounded-md border border-green-200">
+                                                    <svg className="h-5 w-5 text-green-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                                    </svg>
+                                                    <div className="flex-1">
+                                                        <p className="text-sm font-medium text-green-800">File Attached</p>
+                                                        <p className="text-xs text-green-600 mt-1">
+                                                            {document.file_path.split('/').pop()}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div className="flex gap-3">
+                                                    <Link
+                                                        href={route('documents.download', document.id)}
+                                                        className="flex-1 bg-green-600 hover:bg-green-700 text-white text-center font-medium py-2 px-4 rounded transition"
+                                                    >
+                                                        Download File
+                                                    </Link>
+                                                    <Link
+                                                        href={route('documents.edit', document.id)}
+                                                        className="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-center font-medium py-2 px-4 rounded transition"
+                                                    >
+                                                        Replace File
+                                                    </Link>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <div className="text-center py-8">
+                                                <svg className="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                                </svg>
+                                                <p className="text-gray-500 mb-4">No file has been uploaded for this document.</p>
+                                                <Link
+                                                    href={route('documents.edit', document.id)}
+                                                    className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded transition"
+                                                >
+                                                    Upload File
+                                                </Link>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
 
                                 {/* Right Column - Archive Box Info */}

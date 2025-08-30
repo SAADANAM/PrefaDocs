@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Document;
 use App\Models\ArchiveBox;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
 class DocumentController extends Controller
@@ -73,9 +74,26 @@ class DocumentController extends Controller
             'shelf_id' => 'nullable|exists:shelves,id',
             'rack_id' => 'nullable|exists:racks,id',
             'column_id' => 'nullable|exists:columns,id',
+            'document_file' => 'nullable|file|mimes:pdf,doc,docx|max:10240', // 10MB max
         ]);
 
-        Document::create($validated);
+        $filePath = null;
+        
+        // Handle file upload
+        if ($request->hasFile('document_file')) {
+            $file = $request->file('document_file');
+            $fileName = time() . '_' . $file->getClientOriginalName();
+            $filePath = $file->storeAs('public/documents', $fileName);
+        }
+
+        // Create document with file path
+        $documentData = array_filter($validated, function($key) {
+            return $key !== 'document_file';
+        }, ARRAY_FILTER_USE_KEY);
+        
+        $documentData['file_path'] = $filePath;
+        
+        Document::create($documentData);
 
         return redirect()->route('documents.index', ['archive_box_id' => $validated['archive_box_id']])
             ->with('success', 'Document created successfully.');
@@ -119,9 +137,31 @@ class DocumentController extends Controller
             'category' => 'required|string|max:255',
             'year' => 'required|integer|min:1900|max:' . (date('Y') + 1),
             'archive_box_id' => 'required|exists:archive_boxes,id',
+            'document_file' => 'nullable|file|mimes:pdf,doc,docx|max:10240', // 10MB max
         ]);
 
-        $document->update($validated);
+        $filePath = $document->file_path;
+        
+        // Handle file upload
+        if ($request->hasFile('document_file')) {
+            // Delete old file if exists
+            if ($document->hasFile()) {
+                Storage::delete($document->file_path);
+            }
+            
+            $file = $request->file('document_file');
+            $fileName = time() . '_' . $file->getClientOriginalName();
+            $filePath = $file->storeAs('public/documents', $fileName);
+        }
+
+        // Update document data
+        $documentData = array_filter($validated, function($key) {
+            return $key !== 'document_file';
+        }, ARRAY_FILTER_USE_KEY);
+        
+        $documentData['file_path'] = $filePath;
+        
+        $document->update($documentData);
 
         return redirect()->route('documents.index', ['archive_box_id' => $validated['archive_box_id']])
             ->with('success', 'Document updated successfully.');
@@ -134,9 +174,29 @@ class DocumentController extends Controller
     {
         $document = Document::findOrFail($id);
         $archiveBoxId = $document->archive_box_id;
+        
+        // File will be automatically deleted via model boot method
         $document->delete();
 
         return redirect()->route('documents.index', ['archive_box_id' => $archiveBoxId])
             ->with('success', 'Document deleted successfully.');
+    }
+
+    /**
+     * Download the document file
+     */
+    public function download(string $id)
+    {
+        $document = Document::findOrFail($id);
+        
+        if (!$document->hasFile()) {
+            abort(404, 'No file found for this document.');
+        }
+        
+        if (!Storage::exists($document->file_path)) {
+            abort(404, 'File not found on server.');
+        }
+        
+        return Storage::download($document->file_path, $document->getFileName());
     }
 }

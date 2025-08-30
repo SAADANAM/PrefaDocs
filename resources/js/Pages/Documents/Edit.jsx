@@ -7,11 +7,19 @@ export default function Edit({ auth, document, archiveBoxes }) {
         category: document.category,
         year: document.year,
         archive_box_id: document.archive_box_id,
+        document_file: null,
     });
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        form.put(route('documents.update', document.id));
+        form.put(route('documents.update', document.id), {
+            preserveScroll: true,
+        });
+    };
+
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        form.setData('document_file', file);
     };
 
     const categories = [
@@ -54,7 +62,7 @@ export default function Edit({ auth, document, archiveBoxes }) {
                             </div>
 
                             {/* Edit Form */}
-                            <form onSubmit={handleSubmit} className="max-w-2xl">
+                            <form onSubmit={handleSubmit} className="max-w-2xl" encType="multipart/form-data">
                                 <div className="mb-6">
                                     <label className="block text-gray-700 text-sm font-bold mb-2">
                                         Document Name
@@ -134,6 +142,87 @@ export default function Edit({ auth, document, archiveBoxes }) {
                                     </select>
                                     {form.errors.archive_box_id && (
                                         <p className="text-red-500 text-xs italic mt-1">{form.errors.archive_box_id}</p>
+                                    )}
+                                </div>
+
+                                <div className="mb-6">
+                                    <label className="block text-gray-700 text-sm font-bold mb-2">
+                                        File Management
+                                    </label>
+                                    
+                                    {/* Current File Info */}
+                                    {document.file_path && (
+                                        <div className="mb-4 p-3 bg-gray-50 rounded-md border">
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center">
+                                                    <svg className="h-5 w-5 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                                    </svg>
+                                                    <span className="text-sm text-gray-600">
+                                                        Current file: {document.file_path.split('/').pop()}
+                                                    </span>
+                                                </div>
+                                                <Link
+                                                    href={route('documents.download', document.id)}
+                                                    className="text-indigo-600 hover:text-indigo-800 text-sm font-medium"
+                                                >
+                                                    Download
+                                                </Link>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* File Upload */}
+                                    <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
+                                        <div className="space-y-1 text-center">
+                                            <svg
+                                                className="mx-auto h-12 w-12 text-gray-400"
+                                                stroke="currentColor"
+                                                fill="none"
+                                                viewBox="0 0 48 48"
+                                                aria-hidden="true"
+                                            >
+                                                <path
+                                                    d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
+                                                    strokeWidth={2}
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                />
+                                            </svg>
+                                            <div className="flex text-sm text-gray-600">
+                                                <label
+                                                    htmlFor="document_file"
+                                                    className="relative cursor-pointer bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500"
+                                                >
+                                                    <span>{document.file_path ? 'Replace file' : 'Upload a file'}</span>
+                                                    <input
+                                                        id="document_file"
+                                                        name="document_file"
+                                                        type="file"
+                                                        className="sr-only"
+                                                        accept=".pdf,.doc,.docx"
+                                                        onChange={handleFileChange}
+                                                    />
+                                                </label>
+                                                <p className="pl-1">or drag and drop</p>
+                                            </div>
+                                            <p className="text-xs text-gray-500">
+                                                PDF, DOC, DOCX up to 10MB
+                                            </p>
+                                            {document.file_path && (
+                                                <p className="text-xs text-amber-600">
+                                                    ⚠️ Uploading a new file will replace the current one
+                                                </p>
+                                            )}
+                                        </div>
+                                    </div>
+                                    {form.data.document_file && (
+                                        <div className="mt-2 text-sm text-gray-600">
+                                            New file: {form.data.document_file.name}
+                                        </div>
+                                    )}
+                                    {form.errors.document_file && (
+                                        <p className="text-red-500 text-xs italic mt-1">{form.errors.document_file}</p>
                                     )}
                                 </div>
 

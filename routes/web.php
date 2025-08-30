@@ -36,6 +36,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('archive-boxes', ArchiveBoxController::class);
     Route::resource('documents', DocumentController::class);
     Route::get('/documents/archive-with-location', [DocumentController::class, 'archiveWithLocation'])->name('documents.archive-with-location');
+    Route::get('/documents/{id}/download', [DocumentController::class, 'download'])->name('documents.download');
     
     // Storage Management Routes - Admin only
     Route::middleware('admin')->group(function () {
@@ -55,6 +56,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/settings/boxes', [SettingsController::class, 'storeBox'])->name('settings.store-box');
         Route::put('/settings/boxes/{id}', [SettingsController::class, 'updateBox'])->name('settings.update-box');
         Route::delete('/settings/boxes/{id}', [SettingsController::class, 'deleteBox'])->name('settings.delete-box');
+        Route::get('/directions', [SettingsController::class, 'directions'])->name('directions.index');
         Route::post('/settings/directions', [SettingsController::class, 'storeDirection'])->name('settings.store-direction');
         Route::put('/settings/directions/{id}', [SettingsController::class, 'updateDirection'])->name('settings.update-direction');
         Route::delete('/settings/directions/{id}', [SettingsController::class, 'deleteDirection'])->name('settings.delete-direction');

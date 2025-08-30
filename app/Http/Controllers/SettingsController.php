@@ -100,6 +100,18 @@ class SettingsController extends Controller
         return redirect()->back()->with('success', 'Direction deleted successfully.');
     }
 
+    /**
+     * Display the directions management page.
+     */
+    public function directions()
+    {
+        $directions = Direction::all();
+
+        return Inertia::render('Directions/Index', [
+            'directions' => $directions,
+        ]);
+    }
+
     // Room Management
     public function storeRoom(Request $request)
     {
