@@ -1,7 +1,7 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 
-export default function Index({ documents, archiveBox }) {
+export default function Index({ documents, archiveBox, userDocumentRequests }) {
     const page = usePage();
     const { auth, flash } = page.props;
     
@@ -26,13 +26,21 @@ export default function Index({ documents, archiveBox }) {
         });
     };
 
-    const hasPendingRequest = (document) => {
-        // Check if the current user has a pending request for this document
-        return document.document_requests && 
-               document.document_requests.some(request => 
-                   request.user_id === auth?.user?.id && 
-                   request.status === 'pending'
-               );
+    // Get user's request for a specific document
+    const getUserRequest = (documentId) => {
+        return userDocumentRequests?.[documentId] || null;
+    };
+
+    // Check if user has a pending request for a document
+    const hasPendingRequest = (documentId) => {
+        const userRequest = getUserRequest(documentId);
+        return userRequest && userRequest.status === 'pending';
+    };
+
+    // Check if user can request a document
+    const canRequestDocument = (documentId) => {
+        const userRequest = getUserRequest(documentId);
+        return !userRequest || userRequest.status === 'rejected';
     };
 
     return (
@@ -56,6 +64,40 @@ export default function Index({ documents, archiveBox }) {
                             {flash?.error && (
                                 <div className="mb-6 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
                                     {flash.error}
+                                </div>
+                            )}
+
+                            {/* Request Status Summary for Normal Users */}
+                            {auth?.user?.role === 'user' && userDocumentRequests && (
+                                <div className="mb-6 bg-white rounded-lg shadow p-6">
+                                    <h3 className="text-lg font-medium text-gray-900 mb-4">Your Document Request Status</h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                        <div className="bg-blue-50 p-4 rounded-lg">
+                                            <div className="text-2xl font-bold text-blue-600">{Object.keys(userDocumentRequests).length}</div>
+                                            <div className="text-sm text-blue-600">Total Requests</div>
+                                        </div>
+                                        
+                                        <div className="bg-yellow-50 p-4 rounded-lg">
+                                            <div className="text-2xl font-bold text-yellow-600">
+                                                {Object.values(userDocumentRequests).filter(req => req.status === 'pending').length}
+                                            </div>
+                                            <div className="text-sm text-yellow-600">Pending</div>
+                                        </div>
+                                        
+                                        <div className="bg-green-50 p-4 rounded-lg">
+                                            <div className="text-2xl font-bold text-green-600">
+                                                {Object.values(userDocumentRequests).filter(req => req.status === 'approved').length}
+                                            </div>
+                                            <div className="text-sm text-green-600">Approved</div>
+                                        </div>
+                                        
+                                        <div className="bg-red-50 p-4 rounded-lg">
+                                            <div className="text-2xl font-bold text-red-600">
+                                                {Object.values(userDocumentRequests).filter(req => req.status === 'rejected').length}
+                                            </div>
+                                            <div className="text-sm text-red-600">Rejected</div>
+                                        </div>
+                                    </div>
                                 </div>
                             )}
 
@@ -159,21 +201,75 @@ export default function Index({ documents, archiveBox }) {
                                             {/* Request Document Button - Only for regular users */}
                                             {auth?.user?.role === 'user' && (
                                                 <div className="mt-2">
-                                                    {hasPendingRequest(document) ? (
-                                                        <button
-                                                            disabled
-                                                            className="w-full bg-gray-300 text-gray-500 text-sm font-medium py-2 px-3 rounded cursor-not-allowed"
-                                                        >
-                                                            Request Pending
-                                                        </button>
-                                                    ) : (
-                                                        <button
-                                                            onClick={() => handleRequestDocument(document.id)}
-                                                            className="w-full bg-purple-500 hover:bg-purple-600 text-white text-sm font-medium py-2 px-3 rounded transition"
-                                                        >
-                                                            Request Document
-                                                        </button>
-                                                    )}
+                                                    {(() => {
+                                                        const userRequest = getUserRequest(document.id);
+                                                        
+                                                        if (userRequest) {
+                                                            // User has a request - show status
+                                                            switch (userRequest.status) {
+                                                                case 'pending':
+                                                                    return (
+                                                                        <div className="text-center">
+                                                                            <span className="inline-flex items-center px-2.5 py-1.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                                                                Pending
+                                                                            </span>
+                                                                            <div className="text-xs text-gray-500 mt-1">
+                                                                                Requested: {new Date(userRequest.created_at).toLocaleDateString()}
+                                                                            </div>
+                                                                        </div>
+                                                                    );
+                                                                case 'approved':
+                                                                    return (
+                                                                        <div className="text-center">
+                                                                            <span className="inline-flex items-center px-2.5 py-1.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                                                Approved
+                                                                            </span>
+                                                                            <div className="text-xs text-green-600 mt-1">
+                                                                                ✓ Access granted
+                                                                            </div>
+                                                                            {userRequest.responded_at && (
+                                                                                <div className="text-xs text-gray-500 mt-1">
+                                                                                    {new Date(userRequest.responded_at).toLocaleDateString()}
+                                                                                </div>
+                                                                            )}
+                                                                        </div>
+                                                                    );
+                                                                case 'rejected':
+                                                                    return (
+                                                                        <div className="text-center">
+                                                                            <span className="inline-flex items-center px-2.5 py-1.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                                                                Rejected
+                                                                            </span>
+                                                                            <div className="text-xs text-gray-500 mt-1">
+                                                                                {userRequest.responded_at && `Rejected: ${new Date(userRequest.responded_at).toLocaleDateString()}`}
+                                                                            </div>
+                                                                            <button
+                                                                                onClick={() => handleRequestDocument(document.id)}
+                                                                                className="mt-2 w-full bg-purple-500 hover:bg-purple-600 text-white text-xs font-medium py-1.5 px-3 rounded transition"
+                                                                            >
+                                                                                Re-request
+                                                                            </button>
+                                                                        </div>
+                                                                    );
+                                                                default:
+                                                                    return (
+                                                                        <span className="inline-flex items-center px-2.5 py-1.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                                                            {userRequest.status}
+                                                                        </span>
+                                                                    );
+                                                            }
+                                                        } else {
+                                                            // No request - show request button
+                                                            return (
+                                                                <button
+                                                                    onClick={() => handleRequestDocument(document.id)}
+                                                                    className="w-full bg-purple-500 hover:bg-purple-600 text-white text-sm font-medium py-2 px-3 rounded transition"
+                                                                >
+                                                                    Request Document
+                                                                </button>
+                                                            );
+                                                        }
+                                                    })()}
                                                 </div>
                                             )}
                                         </div>

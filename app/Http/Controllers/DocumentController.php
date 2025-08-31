@@ -27,9 +27,19 @@ class DocumentController extends Controller
             $archiveBox = null;
         }
         
+        // Fetch user-specific document requests for efficient status checking
+        $userDocumentRequests = collect();
+        if (auth()->check()) {
+            $userDocumentRequests = \App\Models\DocumentRequest::where('user_id', auth()->id())
+                ->with(['document'])
+                ->get()
+                ->keyBy('document_id');
+        }
+        
         return Inertia::render('Documents/Index', [
             'documents' => $documents,
             'archiveBox' => $archiveBox,
+            'userDocumentRequests' => $userDocumentRequests,
         ]);
     }
 
@@ -200,5 +210,24 @@ class DocumentController extends Controller
         }
         
         return Storage::download($document->file_path, $document->getFileName());
+    }
+
+    /**
+     * Display admin view of all documents with request status
+     */
+    public function adminIndex()
+    {
+        // Check if user is admin
+        if (!auth()->user()->isAdmin()) {
+            abort(403, 'Unauthorized access.');
+        }
+
+        $documents = Document::with(['archiveBox', 'user', 'documentRequests'])
+            ->orderBy('created_at', 'desc')
+            ->paginate(20);
+
+        return view('admin.documents.index', [
+            'documents' => $documents,
+        ]);
     }
 }

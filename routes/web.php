@@ -53,6 +53,9 @@ Route::middleware('auth')->group(function () {
         
         // Document Requests Routes - Admin only
         Route::get('/document-requests', [DocumentRequestController::class, 'index'])->name('document-requests.index');
+        
+        // Admin Documents View - Admin only
+        Route::get('/admin/documents', [DocumentController::class, 'adminIndex'])->name('admin.documents.index');
 
         // Admin Management Routes
         Route::get('/admin-management', [AdminController::class, 'index'])->name('admin.index');
