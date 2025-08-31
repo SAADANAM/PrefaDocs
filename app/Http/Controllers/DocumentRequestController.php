@@ -19,13 +19,21 @@ class DocumentRequestController extends Controller
             abort(403, 'Unauthorized access.');
         }
 
-        $documentRequests = DocumentRequest::with(['user', 'document'])
-            ->orderBy('created_at', 'desc')
-            ->paginate(20);
+        try {
+            $documentRequests = DocumentRequest::with(['user', 'document'])
+                ->orderBy('created_at', 'desc')
+                ->paginate(20);
 
-        return view('admin.document_requests.index', [
-            'documentRequests' => $documentRequests,
-        ]);
+            return view('admin.document_requests.index', [
+                'documentRequests' => $documentRequests,
+            ]);
+        } catch (\Exception $e) {
+            // Log the error for debugging
+            \Log::error('DocumentRequestController index error: ' . $e->getMessage());
+            \Log::error('Stack trace: ' . $e->getTraceAsString());
+            
+            abort(500, 'An error occurred while loading document requests: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -33,6 +41,12 @@ class DocumentRequestController extends Controller
      */
     public function store(Request $request)
     {
+        // Check if user is authenticated
+        if (!Auth::check()) {
+            abort(403, 'Unauthorized access.');
+        }
+
+        // Validate the request
         $validated = $request->validate([
             'document_id' => 'required|exists:documents,id',
         ]);
@@ -47,7 +61,13 @@ class DocumentRequestController extends Controller
             return back()->with('error', 'You already have a pending request for this document.');
         }
 
-        // Create the document request
+        // Check if document exists and is accessible
+        $document = \App\Models\Document::find($validated['document_id']);
+        if (!$document) {
+            return back()->with('error', 'Document not found.');
+        }
+
+        // Create the document request using Eloquent
         DocumentRequest::create([
             'user_id' => Auth::id(),
             'document_id' => $validated['document_id'],

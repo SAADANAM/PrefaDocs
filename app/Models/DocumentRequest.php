@@ -10,6 +10,8 @@ class DocumentRequest extends Model
 {
     use HasFactory;
 
+    protected $table = 'document_requests';
+
     protected $fillable = [
         'user_id',
         'document_id',

@@ -39,6 +39,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/documents/archive-with-location', [DocumentController::class, 'archiveWithLocation'])->name('documents.archive-with-location');
     Route::get('/documents/{id}/download', [DocumentController::class, 'download'])->name('documents.download');
     
+    // Document Request Routes - All authenticated users can submit requests
+    Route::post('/document-requests', [DocumentRequestController::class, 'store'])->name('document-requests.store');
+    
     // Storage Management Routes - Admin only
     Route::middleware('admin')->group(function () {
         Route::resource('shelves', ShelfController::class);
@@ -48,10 +51,9 @@ Route::middleware('auth')->group(function () {
         
         // Document Requests Routes - Admin only
         Route::get('/document-requests', [DocumentRequestController::class, 'index'])->name('document-requests.index');
-        Route::post('/document-requests', [DocumentRequestController::class, 'store'])->name('document-requests.store');
         Route::post('/document-requests/{id}/approve', [DocumentRequestController::class, 'approve'])->name('document-requests.approve');
         Route::post('/document-requests/{id}/reject', [DocumentRequestController::class, 'reject'])->name('document-requests.reject');
-        
+
         // Admin Management Routes
         Route::get('/admin-management', [AdminController::class, 'index'])->name('admin.index');
         Route::post('/admin-management', [AdminController::class, 'store'])->name('admin.store');

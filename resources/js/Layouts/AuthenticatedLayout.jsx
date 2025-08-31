@@ -24,7 +24,7 @@ export default function AuthenticatedLayout({ header, children }) {
                             <div className="flex-shrink-0 flex items-center">
                                 <Link href="/" className="flex items-center">
                                     <ApplicationLogo className="block h-8 w-auto fill-current text-indigo-600" />
-                                    <span className="ml-2 text-xl font-bold text-gray-900">Archive App</span>
+                                    <span className="ml-2 text-xl font-bold text-gray-900">PrefaDocs</span>
                                 </Link>
                             </div>
 

@@ -1,7 +1,10 @@
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 
-export default function Index({ auth, documents, archiveBox }) {
+export default function Index({ documents, archiveBox }) {
+    const page = usePage();
+    const { auth, flash } = page.props;
+    
     const getDocumentIcon = (category) => {
         const icons = {
             'invoice': '📄',
@@ -27,14 +30,14 @@ export default function Index({ auth, documents, archiveBox }) {
         // Check if the current user has a pending request for this document
         return document.document_requests && 
                document.document_requests.some(request => 
-                   request.user_id === auth.user.id && 
+                   request.user_id === auth?.user?.id && 
                    request.status === 'pending'
                );
     };
 
     return (
         <AuthenticatedLayout
-            user={auth.user}
+            user={auth?.user}
             header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">Documents</h2>}
         >
             <Head title="Documents" />
@@ -43,6 +46,19 @@ export default function Index({ auth, documents, archiveBox }) {
                 <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
                     <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                         <div className="p-6 text-gray-900">
+                            {/* Session Messages */}
+                            {flash?.success && (
+                                <div className="mb-6 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+                                    {flash.success}
+                                </div>
+                            )}
+                            
+                            {flash?.error && (
+                                <div className="mb-6 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                                    {flash.error}
+                                </div>
+                            )}
+
                             {/* Header with Add Document button and Box info */}
                             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
                                 <div>
@@ -140,24 +156,26 @@ export default function Index({ auth, documents, archiveBox }) {
                                                 </Link>
                                             </div>
                                             
-                                            {/* Request Document Button */}
-                                            <div className="mt-2">
-                                                {hasPendingRequest(document) ? (
-                                                    <button
-                                                        disabled
-                                                        className="w-full bg-gray-300 text-gray-500 text-sm font-medium py-2 px-3 rounded cursor-not-allowed"
-                                                    >
-                                                        Request Pending
-                                                    </button>
-                                                ) : (
-                                                    <button
-                                                        onClick={() => handleRequestDocument(document.id)}
-                                                        className="w-full bg-purple-500 hover:bg-purple-600 text-white text-sm font-medium py-2 px-3 rounded transition"
-                                                    >
-                                                        Request Document
-                                                    </button>
-                                                )}
-                                            </div>
+                                            {/* Request Document Button - Only for regular users */}
+                                            {auth?.user?.role === 'user' && (
+                                                <div className="mt-2">
+                                                    {hasPendingRequest(document) ? (
+                                                        <button
+                                                            disabled
+                                                            className="w-full bg-gray-300 text-gray-500 text-sm font-medium py-2 px-3 rounded cursor-not-allowed"
+                                                        >
+                                                            Request Pending
+                                                        </button>
+                                                    ) : (
+                                                        <button
+                                                            onClick={() => handleRequestDocument(document.id)}
+                                                            className="w-full bg-purple-500 hover:bg-purple-600 text-white text-sm font-medium py-2 px-3 rounded transition"
+                                                        >
+                                                            Request Document
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 ))}
