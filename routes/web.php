@@ -8,6 +8,7 @@ use App\Http\Controllers\ColumnController;
 use App\Http\Controllers\ArchiveController;
 use App\Http\Controllers\ArchiveBoxController;
 use App\Http\Controllers\DocumentController;
+use App\Http\Controllers\DocumentRequestController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\BoxTypeController;
 use App\Http\Controllers\MultiStepController;
@@ -44,6 +45,12 @@ Route::middleware('auth')->group(function () {
         Route::get('/shelves-location-selection', [ShelfController::class, 'getForLocationSelection'])->name('shelves.location-selection');
         Route::resource('racks', RackController::class);
         Route::resource('columns', ColumnController::class);
+        
+        // Document Requests Routes - Admin only
+        Route::get('/document-requests', [DocumentRequestController::class, 'index'])->name('document-requests.index');
+        Route::post('/document-requests', [DocumentRequestController::class, 'store'])->name('document-requests.store');
+        Route::post('/document-requests/{id}/approve', [DocumentRequestController::class, 'approve'])->name('document-requests.approve');
+        Route::post('/document-requests/{id}/reject', [DocumentRequestController::class, 'reject'])->name('document-requests.reject');
         
         // Admin Management Routes
         Route::get('/admin-management', [AdminController::class, 'index'])->name('admin.index');

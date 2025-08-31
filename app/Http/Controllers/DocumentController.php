@@ -19,11 +19,11 @@ class DocumentController extends Controller
         
         if ($archiveBoxId) {
             $documents = Document::where('archive_box_id', $archiveBoxId)
-                ->with(['archiveBox', 'user'])
+                ->with(['archiveBox', 'user', 'documentRequests'])
                 ->get();
             $archiveBox = ArchiveBox::findOrFail($archiveBoxId);
         } else {
-            $documents = Document::with(['archiveBox', 'user'])->get();
+            $documents = Document::with(['archiveBox', 'user', 'documentRequests'])->get();
             $archiveBox = null;
         }
         

@@ -1,4 +1,4 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 
 export default function Index({ auth, documents, archiveBox }) {
@@ -15,6 +15,21 @@ export default function Index({ auth, documents, archiveBox }) {
             'default': '📄'
         };
         return icons[category.toLowerCase()] || icons.default;
+    };
+
+    const handleRequestDocument = (documentId) => {
+        router.post(route('document-requests.store'), {
+            document_id: documentId
+        });
+    };
+
+    const hasPendingRequest = (document) => {
+        // Check if the current user has a pending request for this document
+        return document.document_requests && 
+               document.document_requests.some(request => 
+                   request.user_id === auth.user.id && 
+                   request.status === 'pending'
+               );
     };
 
     return (
@@ -110,7 +125,7 @@ export default function Index({ auth, documents, archiveBox }) {
                                             </div>
                                             
                                             {/* Action Buttons */}
-                                            <div className="flex gap-2">
+                                            <div className="flex gap-2 mb-2">
                                                 <Link
                                                     href={route('documents.show', document.id)}
                                                     className="flex-1 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium py-2 px-3 rounded text-center transition"
@@ -123,6 +138,25 @@ export default function Index({ auth, documents, archiveBox }) {
                                                 >
                                                     Edit
                                                 </Link>
+                                            </div>
+                                            
+                                            {/* Request Document Button */}
+                                            <div className="mt-2">
+                                                {hasPendingRequest(document) ? (
+                                                    <button
+                                                        disabled
+                                                        className="w-full bg-gray-300 text-gray-500 text-sm font-medium py-2 px-3 rounded cursor-not-allowed"
+                                                    >
+                                                        Request Pending
+                                                    </button>
+                                                ) : (
+                                                    <button
+                                                        onClick={() => handleRequestDocument(document.id)}
+                                                        className="w-full bg-purple-500 hover:bg-purple-600 text-white text-sm font-medium py-2 px-3 rounded transition"
+                                                    >
+                                                        Request Document
+                                                    </button>
+                                                )}
                                             </div>
                                         </div>
                                     </div>

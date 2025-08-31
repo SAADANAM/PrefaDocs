@@ -95,6 +95,12 @@ export default function AuthenticatedLayout({ header, children }) {
                                                         Admin Management
                                                     </Link>
                                                     <Link
+                                                        href={route('document-requests.index')}
+                                                        className="block px-4 py-3 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 transition-colors duration-150"
+                                                    >
+                                                        Document Requests
+                                                    </Link>
+                                                    <Link
                                                         href={route('multi-step.step1')}
                                                         className="block px-4 py-3 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 transition-colors duration-150"
                                                     >
@@ -346,6 +352,13 @@ export default function AuthenticatedLayout({ header, children }) {
                                     className="block px-3 py-2 rounded-md text-base font-medium"
                                 >
                                     Admin Management
+                                </ResponsiveNavLink>
+                                <ResponsiveNavLink
+                                    href={route('document-requests.index')}
+                                    active={route().current('document-requests.*')}
+                                    className="block px-3 py-2 rounded-md text-base font-medium"
+                                >
+                                    Document Requests
                                 </ResponsiveNavLink>
                                 <ResponsiveNavLink
                                     href={route('multi-step.step1')}

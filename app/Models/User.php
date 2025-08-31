@@ -71,4 +71,12 @@ class User extends Authenticatable
     {
         return $this->hasMany(Document::class);
     }
+
+    /**
+     * Get all document requests made by this user
+     */
+    public function documentRequests(): HasMany
+    {
+        return $this->hasMany(DocumentRequest::class);
+    }
 }
