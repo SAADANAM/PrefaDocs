@@ -41,6 +41,8 @@ Route::middleware('auth')->group(function () {
     
     // Document Request Routes - All authenticated users can submit requests
     Route::post('/document-requests', [DocumentRequestController::class, 'store'])->name('document-requests.store');
+    Route::post('/document-requests/{id}/approve', [DocumentRequestController::class, 'approve'])->name('document-requests.approve');
+    Route::post('/document-requests/{id}/reject', [DocumentRequestController::class, 'reject'])->name('document-requests.reject');
     
     // Storage Management Routes - Admin only
     Route::middleware('admin')->group(function () {
@@ -51,8 +53,6 @@ Route::middleware('auth')->group(function () {
         
         // Document Requests Routes - Admin only
         Route::get('/document-requests', [DocumentRequestController::class, 'index'])->name('document-requests.index');
-        Route::post('/document-requests/{id}/approve', [DocumentRequestController::class, 'approve'])->name('document-requests.approve');
-        Route::post('/document-requests/{id}/reject', [DocumentRequestController::class, 'reject'])->name('document-requests.reject');
 
         // Admin Management Routes
         Route::get('/admin-management', [AdminController::class, 'index'])->name('admin.index');
