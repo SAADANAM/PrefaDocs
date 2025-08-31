@@ -19,11 +19,11 @@ class DocumentController extends Controller
         
         if ($archiveBoxId) {
             $documents = Document::where('archive_box_id', $archiveBoxId)
-                ->with('archiveBox')
+                ->with(['archiveBox', 'user'])
                 ->get();
             $archiveBox = ArchiveBox::findOrFail($archiveBoxId);
         } else {
-            $documents = Document::with('archiveBox')->get();
+            $documents = Document::with(['archiveBox', 'user'])->get();
             $archiveBox = null;
         }
         
@@ -86,12 +86,13 @@ class DocumentController extends Controller
             $filePath = $file->storeAs('public/documents', $fileName);
         }
 
-        // Create document with file path
+        // Create document with file path and user_id
         $documentData = array_filter($validated, function($key) {
             return $key !== 'document_file';
         }, ARRAY_FILTER_USE_KEY);
         
         $documentData['file_path'] = $filePath;
+        $documentData['user_id'] = auth()->id();
         
         Document::create($documentData);
 
@@ -154,12 +155,13 @@ class DocumentController extends Controller
             $filePath = $file->storeAs('public/documents', $fileName);
         }
 
-        // Update document data
+        // Update document data (preserve existing user_id)
         $documentData = array_filter($validated, function($key) {
             return $key !== 'document_file';
         }, ARRAY_FILTER_USE_KEY);
         
         $documentData['file_path'] = $filePath;
+        // user_id is not included in update to preserve the original owner
         
         $document->update($documentData);
 

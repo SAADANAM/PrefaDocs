@@ -20,11 +20,17 @@ class Document extends Model
         'rack_id',
         'column_id',
         'file_path',
+        'user_id',
     ];
 
     public function archiveBox(): BelongsTo
     {
         return $this->belongsTo(ArchiveBox::class);
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 
     /**

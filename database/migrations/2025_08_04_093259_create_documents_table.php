@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('category');
             $table->year('year');
             $table->foreignId('archive_box_id')->constrained()->onDelete('cascade');
+            $table->foreignId('user_id')->nullable()->constrained()->onDelete('cascade');
             $table->timestamps();
         });
     }

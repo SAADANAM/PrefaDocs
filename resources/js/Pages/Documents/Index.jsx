@@ -75,6 +75,13 @@ export default function Index({ auth, documents, archiveBox }) {
                                             <p className="text-sm text-gray-600 mb-2">{document.category}</p>
                                             <p className="text-sm text-gray-500 mb-3">{document.year}</p>
                                             
+                                            {/* Document Owner */}
+                                            {document.user && (
+                                                <p className="text-xs text-gray-400 mb-3">
+                                                    Owner: {document.user.name}
+                                                </p>
+                                            )}
+                                            
                                             {/* File Status */}
                                             <div className="mb-4">
                                                 {document.file_path ? (
